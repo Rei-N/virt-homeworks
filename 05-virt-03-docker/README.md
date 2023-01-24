@@ -44,6 +44,24 @@ Hey, Netology
 ```
 Опубликуйте созданный форк в своем репозитории и предоставьте ответ в виде ссылки на https://hub.docker.com/username_repo.
 
+Ответ:
+docker pull nvrein/netology:1.0.1
+
+```
+root@server1:/home/vagrant# docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED         STATUS         PORTS                               NAMES
+62754462c693   0675a0b7f134   "/docker-entrypoint.…"   4 seconds ago   Up 3 seconds   0.0.0.0:80->80/tcp, :::80->80/tcp   hardcore_ride
+root@server1:/home/vagrant# curl http://localhost
+<html>
+<head>
+Hey, Netology
+</head>
+<body>
+<h1>I’m DevOps Engineer!</h1>
+</body>
+</html>
+```
+
 ## Задача 2
 
 Посмотрите на сценарий ниже и ответьте на вопрос:
@@ -64,6 +82,26 @@ Hey, Netology
 - MongoDB, как основное хранилище данных для java-приложения;
 - Gitlab сервер для реализации CI/CD процессов и приватный (закрытый) Docker Registry.
 
+Ответ:
+
+1) При ограничениях которые вызывает монолитное высоконагруженно приложение (изменение одного модуля требует пересборки всего приложения, малая масштабируемость) нет возможности
+использовать микросервисную архитектуру, лучше всего использовать физическую машину, для большей производительности
+
+2) Для этого типа приложения лучше использовать контейнеры, так как по сути это веб приложение 
+
+3) Для удобства управления и пользовательского интерфейса лучше использовать виртуальную машину
+
+4) Так как это сервис обработки данных, то лучше использовать контейниризацию. Это позволит минимизировать накладные расходы на виртуализацию, а также появляется удобство в масштабируемости и отказоустойчивости
+
+5) Возможно использование как виртуализации так и контейнеров в зависимости от масштаба проекта. Для небольших проектов можно использовать контейнеры
+
+6) Та же ситуация что и с предыдущим примером
+
+7) Для этого сервис БД можно использовать как контейнеризацию так и виртуализацию. Масштабируемость и отказоустойчивость проще реализовать на уровне контейниризации.
+
+8) Для реализации CI/CD сам сервер должен соответсвовать этим требованиям, лучше всего использовать виртуальную машину
+
+
 ## Задача 3
 
 - Запустите первый контейнер из образа ***centos*** c любым тэгом в фоновом режиме, подключив папку ```/data``` из текущей рабочей директории на хостовой машине в ```/data``` контейнера;
@@ -71,6 +109,56 @@ Hey, Netology
 - Подключитесь к первому контейнеру с помощью ```docker exec``` и создайте текстовый файл любого содержания в ```/data```;
 - Добавьте еще один файл в папку ```/data``` на хостовой машине;
 - Подключитесь во второй контейнер и отобразите листинг и содержание файлов в ```/data``` контейнера.
+
+Ответ:
+
+1) 
+```
+root@server1:/home/vagrant# docker run -td -v /data:/data centos:my_tag
+cb9cb22a4dd48543058d54940c256d09e8d21f0ecdae715b41be39d56825abed
+root@server1:/home/vagrant# docker ps
+CONTAINER ID   IMAGE           COMMAND       CREATED         STATUS         PORTS     NAMES
+cb9cb22a4dd4   centos:my_tag   "/bin/bash"   3 seconds ago   Up 2 seconds             epic_bohr
+```
+
+2)
+```
+root@server1:/home/vagrant# docker run -td -v /data:/data debian:latest
+149bf32c488963eda218a848097e51f6f940299dc08034f0ce769cbc4fc12578
+root@server1:/home/vagrant# docker ps
+CONTAINER ID   IMAGE           COMMAND       CREATED         STATUS         PORTS     NAMES
+149bf32c4889   debian:latest   "bash"        4 seconds ago   Up 3 seconds             gracious_taussig
+cb9cb22a4dd4   centos:my_tag   "/bin/bash"   8 minutes ago   Up 8 minutes             epic_bohr
+root@server1:/home/vagrant# docker exec -it gracious_taussig ls
+bin   data  etc   lib    media  opt   root  sbin  sys  usr
+boot  dev   home  lib64  mnt    proc  run   srv   tmp  var
+root@server1:/home/vagrant# docker exec -it epic_bohr ls
+bin  data  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+root@server1:/home/vagrant#
+```
+
+3)
+```
+root@server1:/home/vagrant# docker exec -it epic_bohr bash
+[root@cb9cb22a4dd4 /]# echo "somedata" > /data/myfile
+```
+
+4) 
+```
+root@server1:/home/vagrant# echo "newdata" > /data/newfile
+root@server1:/home/vagrant# cat /data/newfile
+newdata
+```
+
+5)
+```
+root@server1:/home/vagrant# docker exec -it gracious_taussig bash
+root@149bf32c4889:/# ls /data/
+myfile  newfile
+root@149bf32c4889:/# diff -y /data/myfile /data/newfile
+somedata                                                      | newdata
+```
+
 
 ## Задача 4 (*)
 
