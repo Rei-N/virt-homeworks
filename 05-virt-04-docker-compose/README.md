@@ -28,6 +28,38 @@
 
 Для получения зачета вам необходимо предоставить скриншот страницы с созданным образом из личного кабинета YandexCloud.
 
+Ответ: 
+```
+root@server1:/home/vagrant/virt-video-code/terraform# packer build ubuntu22.04.json
+yandex: output will be in this color.
+
+==> yandex: Creating temporary RSA SSH key for instance...
+==> yandex: Using as source image: fd89n8278rhueakslujo (name: "ubuntu-22-04-lts-v20230123", family: "ubuntu-2204-lts")
+==> yandex: Use provided subnet id e9bprgj9j4uqcoc14lff
+==> yandex: Creating disk...
+==> yandex: Creating instance...
+==> yandex: Waiting for instance with id fhmo15vsapm1dr8nc39p to become active...
+    yandex: Detected instance IP: 51.250.71.226
+==> yandex: Using SSH communicator to connect: 51.250.71.226
+==> yandex: Waiting for SSH to become available...
+==> yandex: Connected to SSH!
+==> yandex: Stopping instance...
+==> yandex: Deleting instance...
+    yandex: Instance has been deleted!
+==> yandex: Creating image: ubuntu-2204-base
+==> yandex: Waiting for image to complete...
+==> yandex: Success image create...
+==> yandex: Destroying boot disk...
+    yandex: Disk has been deleted!
+Build 'yandex' finished after 2 minutes 33 seconds.
+
+==> Wait completed after 2 minutes 33 seconds
+
+==> Builds finished. The artifacts of successful builds are:
+--> yandex: A disk image was created: ubuntu-2204-base (id: fd83v0pbdmbk8c8v53au) with family name ubuntu-base
+```
+![image](https://user-images.githubusercontent.com/5601009/215697928-e00f884f-15f2-4ad3-91a2-c9186506eb00.png)
+
 ## Задача 2
 
 Создать вашу первую виртуальную машину в YandexCloud с помощью terraform. 
@@ -35,12 +67,38 @@
 
 Для получения зачета, вам необходимо предоставить вывод команды terraform apply и страницы свойств созданной ВМ из личного кабинета YandexCloud.
 
+Ответ:
+```
+yandex_compute_instance.worker[0]: Creating...
+yandex_compute_instance.manager[0]: Creating...
+yandex_compute_instance.worker[0]: Still creating... [10s elapsed]
+yandex_compute_instance.manager[0]: Still creating... [10s elapsed]
+yandex_compute_instance.worker[0]: Still creating... [20s elapsed]
+yandex_compute_instance.manager[0]: Still creating... [20s elapsed]
+yandex_compute_instance.worker[0]: Still creating... [30s elapsed]
+yandex_compute_instance.manager[0]: Still creating... [30s elapsed]
+yandex_compute_instance.worker[0]: Still creating... [40s elapsed]
+yandex_compute_instance.manager[0]: Still creating... [40s elapsed]
+yandex_compute_instance.manager[0]: Still creating... [50s elapsed]
+yandex_compute_instance.worker[0]: Still creating... [50s elapsed]
+yandex_compute_instance.worker[0]: Creation complete after 51s [id=fhm2se97e2l2uenudrjd]
+yandex_compute_instance.manager[0]: Creation complete after 52s [id=fhmh9fo5pm80s7vi1sj3]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+```
+
+![image](https://user-images.githubusercontent.com/5601009/215698076-a530cb6b-279c-4b36-b35b-49ef6b0c742f.png)
+
 ## Задача 3
 
 С помощью ansible и docker-compose разверните на виртуальной машине из предыдущего задания систему мониторинга на основе Prometheus/Grafana .
 Используйте ansible код в директории ([src/ansible](https://github.com/netology-group/virt-homeworks/tree/virt-11/05-virt-04-docker-compose/src/ansible))
 
 Для получения зачета вам необходимо предоставить вывод команды "docker ps" , все контейнеры, описанные в ([docker-compose](https://github.com/netology-group/virt-homeworks/blob/virt-11/05-virt-04-docker-compose/src/ansible/stack/docker-compose.yaml)),  должны быть в статусе "Up".
+
+Ответ:
+![image](https://user-images.githubusercontent.com/5601009/215698496-bb7b184a-29fa-4598-b37a-e98caade5ff4.png)
+
 
 ## Задача 4
 
@@ -54,6 +112,10 @@
 <p align="center">
   <img width="1200" height="600" src="./assets/yc_02.png">
 </p>
+
+Ответ:
+![image](https://user-images.githubusercontent.com/5601009/215698653-0266edfe-2b00-411b-b37d-59062f0be3fa.png)
+
 
 ## Задача 5 (*)
 
