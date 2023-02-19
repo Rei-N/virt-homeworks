@@ -12,6 +12,31 @@
 
 Приведите получившуюся команду или docker-compose манифест.
 
+Ответ:
+
+```
+version: "3"
+
+volumes:
+  pg_data:
+  pg_backup:
+
+services:
+
+  postgressql:
+    image: postgres:12
+    ports:
+      - 5432:5432
+    container_name: postgresql
+    environment:
+      - PGDATA=/var/lib/postgresql/data/
+      - POSTGRES_PASSWORD=pgsql
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - pg_backup:/var/usr/backup
+
+```
+
 ## Задача 2
 
 В БД из задачи 1: 
@@ -37,6 +62,68 @@
 - описание таблиц (describe)
 - SQL-запрос для выдачи списка пользователей с правами над таблицами test_db
 - список пользователей с правами над таблицами test_db
+
+Ответ:
+1)
+```
+  datname  | datcollate
+-----------+------------
+ postgres  | en_US.utf8
+ test_db   | en_US.utf8
+ template1 | en_US.utf8
+ template0 | en_US.utf8
+(4 rows)
+```
+
+2)
+```
+ table_catalog | table_schema | table_name | column_name  |     data_type
+---------------+--------------+------------+--------------+-------------------
+ postgres      | public       | orders     | id           | integer
+ postgres      | public       | orders     | order_name   | character varying
+ postgres      | public       | orders     | price        | integer
+ postgres      | public       | clients    | id           | integer
+ postgres      | public       | clients    | last_name    | character varying
+ postgres      | public       | clients    | country      | character varying
+ postgres      | public       | clients    | order_number | integer
+(7 rows)
+```
+
+3)
+```
+SELECT grantee, table_name, privilege_type
+FROM information_schema.table_privileges
+WHERE grantee in ('test-admin-user','test-simple-user') and table_name in ('clients','orders') order by grantee;
+```
+
+4)
+```
+     grantee      | table_name | privilege_type
+------------------+------------+----------------
+ test-admin-user  | orders     | INSERT
+ test-admin-user  | orders     | SELECT
+ test-admin-user  | orders     | UPDATE
+ test-admin-user  | orders     | DELETE
+ test-admin-user  | orders     | TRUNCATE
+ test-admin-user  | orders     | REFERENCES
+ test-admin-user  | orders     | TRIGGER
+ test-admin-user  | clients    | INSERT
+ test-admin-user  | clients    | SELECT
+ test-admin-user  | clients    | UPDATE
+ test-admin-user  | clients    | DELETE
+ test-admin-user  | clients    | TRUNCATE
+ test-admin-user  | clients    | REFERENCES
+ test-admin-user  | clients    | TRIGGER
+ test-simple-user | clients    | INSERT
+ test-simple-user | orders     | INSERT
+ test-simple-user | orders     | SELECT
+ test-simple-user | orders     | UPDATE
+ test-simple-user | orders     | DELETE
+ test-simple-user | clients    | SELECT
+ test-simple-user | clients    | UPDATE
+ test-simple-user | clients    | DELETE
+(22 rows)
+```
 
 ## Задача 3
 
@@ -68,6 +155,49 @@
     - запросы 
     - результаты их выполнения.
 
+Ответ:
+1)
+```
+postgres=# select count(id) from orders;
+ count
+-------
+     5
+(1 row)
+
+postgres=# select count(id) from clients;
+ count
+-------
+     5
+(1 row)
+```
+
+2)
+```
+postgres=# INSERT INTO orders VALUES (1, 'Шоколад', 10), (2, 'Принтер', 3000), (3, 'Книга', 500), (4, 'Монитор', 7000), (5, 'Гитара', 4000);
+INSERT 0 5
+postgres=# select * from orders;
+ id | order_name | price
+----+------------+-------
+  1 | Шоколад    |    10
+  2 | Принтер    |  3000
+  3 | Книга      |   500
+  4 | Монитор    |  7000
+  5 | Гитара     |  4000
+(5 rows)
+
+postgres=# INSERT INTO clients VALUES (1, 'Иванов Иван Иванович', 'USA'), (2, 'Петров Петр Петрович', 'Canada'), (3, 'Иоганн Себастьян Бах', 'Japan'), (4, 'Ронни Джеймс Дио', 'Russia'), (5, 'Ritchie Blackmore', 'Russia');
+INSERT 0 5
+postgres=# select * from clients;
+ id |      last_name       | country | order_number
+----+----------------------+---------+--------------
+  1 | Иванов Иван Иванович | USA     |
+  2 | Петров Петр Петрович | Canada  |
+  3 | Иоганн Себастьян Бах | Japan   |
+  4 | Ронни Джеймс Дио     | Russia  |
+  5 | Ritchie Blackmore    | Russia  |
+(5 rows)
+```
+
 ## Задача 4
 
 Часть пользователей из таблицы clients решили оформить заказы из таблицы orders.
@@ -86,12 +216,47 @@
  
 Подсказк - используйте директиву `UPDATE`.
 
-## Задача 5
+Ответ:
+1)
+```
+postgres=# UPDATE clients SET "order_number" = (SELECT id FROM orders WHERE "order_name"='Книга') WHERE "last_name"='Иванов Иван Иванович';
+UPDATE 1
+postgres=# UPDATE clients SET "order_number" = (SELECT id FROM orders WHERE "order_name"='Монитор') WHERE "last_name"='Петров Петр Петрович';
+UPDATE 1
+postgres=# UPDATE clients SET "order_number" = (SELECT id FROM orders WHERE "order_name"='Гитара') WHERE "last_name"='Иоганн Себастьян Бах';
+UPDATE 1
+```
+
+2)
+```
+postgres=# SELECT c.last_name, c.country, o.order_name  FROM clients c JOIN orders o ON c.order_number = o.id;
+      last_name       | country | order_name
+----------------------+---------+------------
+ Иванов Иван Иванович | USA     | Книга
+ Петров Петр Петрович | Canada  | Монитор
+ Иоганн Себастьян Бах | Japan   | Гитара
+(3 rows)
+```
+
+##Задача 5
 
 Получите полную информацию по выполнению запроса выдачи всех пользователей из задачи 4 
 (используя директиву EXPLAIN).
 
 Приведите получившийся результат и объясните что значат полученные значения.
+
+Ответ:
+```
+postgres=# explain SELECT c.last_name, c.country, o.order_name  FROM clients c JOIN orders o ON c.order_number = o.id;
+                               QUERY PLAN
+------------------------------------------------------------------------
+ Hash Join  (cost=27.55..41.97 rows=350 width=264)
+   Hash Cond: (c.order_number = o.id)
+   ->  Seq Scan on clients c  (cost=0.00..13.50 rows=350 width=200)
+   ->  Hash  (cost=17.80..17.80 rows=780 width=72)
+         ->  Seq Scan on orders o  (cost=0.00..17.80 rows=780 width=72)
+```
+EXPLAIN - позволяет нам дать служебную информацию о запросе к БД, в том числе время на выполнение запроса, что при оптимизации работы БД является очень полезной информацией.
 
 ## Задача 6
 
