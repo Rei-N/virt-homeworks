@@ -270,6 +270,29 @@ EXPLAIN - позволяет нам дать служебную информац
 
 Приведите список операций, который вы применяли для бэкапа данных и восстановления. 
 
+Ответ:
+```
+root@efa3b17dbeb6:/# export PGPASSWORD=password && pg_dumpall -h localhost -U test-admin-user > /var/usr/backup/backup_db.sql
+
+root@efa3b17dbeb6:/# ls /var/usr/backup/
+backup_db.sql
+
+docker-compose stop
+docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+docker run --rm -d -e POSTGRES_USER=test-admin-user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=test_db -v /home/vagrant/virt-video-code/docker-compose/backup/:/var/usr/backup --name postgresql2 postgres:12
+
+docker ps
+CONTAINER ID   IMAGE         COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+hrf5n34rgfu8   postgres:12   "docker-entrypoint.s…"   7 seconds ago   Up 5 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   postgresql2
+
+docker exec -it hrf5n34rgfu8 bash
+root@hrf5n34rgfu8:/# ls /var/usr/backup/
+backup_db.sql
+root@hrf5n34rgfu8:/# export PGPASSWORD=password && psql -h localhost -U test-admin-user -f /var/usr/backup/backup_db.sql test_db
+```
+
 ---
 
 ### Как cдавать задание
