@@ -24,8 +24,91 @@
 
 В следующих заданиях мы будем продолжать работу с данным контейнером.
 
-## Задача 2
+Ответ:
+1) docker-compose
+```
+version: "3"
 
+volumes:
+  db:
+    driver: local
+
+services:
+
+  db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    ports:
+      - 3306:3306
+    container_name: mysql
+    environment:
+      - MYSQL_DATABASE=test_db
+      - MYSQL_ROOT_PASSWORD=mysql
+    volumes:
+      - db:/var/lib/mysql
+      - ./test_dump.sql:/docker-entrypoint-initdb.d/test_dump.sql
+```
+
+2)
+```
+mysql> \s
+--------------
+mysql  Ver 8.0.32 for Linux on x86_64 (MySQL Community Server - GPL)
+
+Connection id:          11
+Current database:       mysql
+Current user:           root@localhost
+SSL:                    Not in use
+Current pager:          stdout
+Using outfile:          ''
+Using delimiter:        ;
+Server version:         8.0.32 MySQL Community Server - GPL
+Protocol version:       10
+Connection:             Localhost via UNIX socket
+Server characterset:    utf8mb4
+Db     characterset:    utf8mb4
+Client characterset:    latin1
+Conn.  characterset:    latin1
+UNIX socket:            /var/run/mysqld/mysqld.sock
+Binary data as:         Hexadecimal
+Uptime:                 13 min 28 sec
+
+Threads: 2  Questions: 95  Slow queries: 0  Opens: 245  Flush tables: 3  Open tables: 164  Queries per second avg: 0.117
+--------------
+```
+
+3)
+```
+cmysql> connect test_db;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Connection id:    12
+Current database: test_db
+
+mysql> show tables;
++-------------------+
+| Tables_in_test_db |
++-------------------+
+| orders            |
++-------------------+
+1 row in set (0.00 sec)
+```
+
+4)
+```
+mysql> select count(id) from orders where price > 300;
++-----------+
+| count(id) |
++-----------+
+|         1 |
++-----------+
+1 row in set (0.00 sec)
+```
+
+## Задача 2
 Создайте пользователя test в БД c паролем test-pass, используя:
 - плагин авторизации mysql_native_password
 - срок истечения пароля - 180 дней 
@@ -39,6 +122,33 @@
     
 Используя таблицу INFORMATION_SCHEMA.USER_ATTRIBUTES получите данные по пользователю `test` и 
 **приведите в ответе к задаче**.
+
+Ответ:
+1)
+```
+mysql> create user 'test' identified with mysql_native_password by 'test-pass' with max_queries_per_hour 100 password expire interval 180 day failed_login_attempts 3 attribute '{"fname": "James","lname": "Pretty"}';
+Query OK, 0 rows affected (0.02 sec)
+```
+
+2)
+```
+mysql> grant select on test_db.* to test;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> flush privileges;
+Query OK, 0 rows affected (0.02 sec)
+```
+
+3)
+```
+mysql> select * from INFORMATION_SCHEMA.USER_ATTRIBUTES where user = 'test';
++------+------+---------------------------------------+
+| USER | HOST | ATTRIBUTE                             |
++------+------+---------------------------------------+
+| test | %    | {"fname": "James", "lname": "Pretty"} |
++------+------+---------------------------------------+
+1 row in set (0.01 sec)
+```
 
 ## Задача 3
 
