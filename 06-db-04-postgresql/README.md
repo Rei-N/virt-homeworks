@@ -16,6 +16,7 @@
 - выхода из psql
 
 Ответ:
+
 1)
 ```
 \l - список БД
@@ -43,6 +44,7 @@
 **Приведите в ответе** команду, которую вы использовали для вычисления и полученный результат.
 
 Ответ:
+
 1)
 ```
 postgres=# CREATE DATABASE test_database;
@@ -114,6 +116,35 @@ test_database=# select avg_width from pg_stats where tablename = 'orders';
 
 Ответ:
 1)
+
+```
+test_database=# begin;
+BEGIN
+test_database=*# create table orders_partitioned (
+        id integer NOT NULL,
+        title varchar(80) NOT NULL,
+        price integer) partition by range(price);
+CREATE TABLE
+test_database=*# create table orders_1 partition of orders_partitioned for values from (499) to (99999);
+CREATE TABLE
+test_database=*# create table orders_2 partition of orders_partitioned for values from (0) to (499);
+CREATE TABLE
+test_database=*# insert into orders_partitioned (id, title, price) select * from orders;
+INSERT 0 8
+test_database=*# commit;
+COMMIT
+
+test_database=# \dt
+                     List of relations
+ Schema |        Name        |       Type        |  Owner
+--------+--------------------+-------------------+----------
+ public | orders             | table             | postgres
+ public | orders_1           | table             | postgres
+ public | orders_2           | table             | postgres
+ public | orders_partitioned | partitioned table | postgres
+```
+
+2) При изначальном проектировании таблицы нужно было заложить партицирование.
 
 ## Задача 4
 
