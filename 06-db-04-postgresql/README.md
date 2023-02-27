@@ -15,6 +15,16 @@
 - вывода описания содержимого таблиц
 - выхода из psql
 
+Ответ:
+1)
+```
+\l - список БД
+\c[onnect] {[DBNAME|- USER|- HOST|- PORT|-] | conninfo} connect to new database (currently "postgres") - подключение к БД
+\dt[S+] [PATTERN] - список таблиц
+\d[S+]  NAME - описание содержимого таблиц
+\q - выход из psql
+```
+
 ## Задача 2
 
 Используя `psql` создайте БД `test_database`.
@@ -32,6 +42,66 @@
 
 **Приведите в ответе** команду, которую вы использовали для вычисления и полученный результат.
 
+Ответ:
+1)
+```
+postgres=# CREATE DATABASE test_database;
+CREATE DATABASE
+```
+
+2)
+```
+postgres=# CREATE DATABASE test_database;
+CREATE DATABASE
+postgres=# \q
+postgres@5369042875e1:/$ psql -f /tmp/pg_test_dump.sql test_database
+SET
+SET
+SET
+SET
+SET
+ set_config
+------------
+
+(1 row)
+
+SET
+SET
+SET
+SET
+SET
+SET
+CREATE TABLE
+ALTER TABLE
+CREATE SEQUENCE
+ALTER TABLE
+ALTER SEQUENCE
+ALTER TABLE
+COPY 8
+ setval
+--------
+      8
+(1 row)
+
+ALTER TABLE
+```
+
+3)
+```
+test_database=# ANALYZE orders;
+ANALYZE
+```
+
+4)
+```
+test_database=# select avg_width from pg_stats where tablename = 'orders';
+ avg_width
+-----------
+         4
+        16
+         4
+```
+
 ## Задача 3
 
 Архитектор и администратор БД выяснили, что ваша таблица orders разрослась до невиданных размеров и
@@ -41,6 +111,9 @@
 Предложите SQL-транзакцию для проведения данной операции.
 
 Можно ли было изначально исключить "ручное" разбиение при проектировании таблицы orders?
+
+Ответ:
+1)
 
 ## Задача 4
 
