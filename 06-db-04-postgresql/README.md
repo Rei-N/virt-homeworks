@@ -115,8 +115,8 @@ test_database=# select avg_width from pg_stats where tablename = 'orders';
 Можно ли было изначально исключить "ручное" разбиение при проектировании таблицы orders?
 
 Ответ:
-1)
 
+1)
 ```
 test_database=# begin;
 BEGIN
@@ -151,6 +151,22 @@ test_database=# \dt
 Используя утилиту `pg_dump` создайте бекап БД `test_database`.
 
 Как бы вы доработали бэкап-файл, чтобы добавить уникальность значения столбца `title` для таблиц `test_database`?
+
+Ответ:
+
+1) Если мы хотим, чтобы столбец имел только уникальные значения, то для него можно определить атрибут UNIQUE.
+```
+ALTER TABLE ONLY test_database ADD UNIQUE (title);
+
+ALTER TABLE test_database ADD UNIQUE (title);
+ALTER INDEX title
+    ATTACH PARTITION title;
+```
+
+2)
+```
+export PGPASSWORD=pgpass && pg_dump -h localhost -U postgres -d test_database > test_database_dump.sql
+```
 
 ---
 
