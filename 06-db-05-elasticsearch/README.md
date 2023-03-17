@@ -126,6 +126,46 @@ Enter host password for user 'elastic':
 При проектировании кластера elasticsearch нужно корректно рассчитывать количество реплик и шард,
 иначе возможна потеря данных индексов, вплоть до полной, при деградации системы.
 
+Ответ:
+1)
+
+```
+curl --cacert http_ca.crt -u elastic -X PUT "https://localhost:9200/ind-1" -H 'Content-Type: application/json' -d'{ "settings": { "number_of_shards": 1,  "number_of_replicas": 0 }}'
+curl --cacert http_ca.crt -u elastic -X PUT "https://localhost:9200/ind-2" -H 'Content-Type: application/json' -d'{ "settings": { "number_of_shards": 2,  "number_of_replicas": 1 }}'
+curl --cacert http_ca.crt -u elastic -X PUT "https://localhost:9200/ind-3" -H 'Content-Type: application/json' -d'{ "settings": { "number_of_shards": 4,  "number_of_replicas": 2 }}'
+```
+
+2)
+
+```
+curl --cacert http_ca.crt -u elastic -X GET "https://localhost:9200/_cat/indices?v"
+Enter host password for user 'elastic':
+health status index uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   ind-1 Vd9c3aGaSTmcgPaUI8LxiA   1   0          0            0       225b           225b
+yellow open   ind-3 blflSo4bT_2_N8h1p_7n4Q   4   2          0            0       900b           900b
+yellow open   ind-2 pzMI6hyQSTie6khn6ZiJQg   2   1          0            0       450b           450b
+
+```
+
+3)
+
+```
+Cтатус green есть только у первого индекса так как у него нет реплик, остальные со статусом yellow так как этим индексам мы назначили реплики, но реплик на самом деле нет и кластер сообщает что их нужно будет по хорошему добавить.
+```
+
+4)
+
+```
+curl --cacert http_ca.crt -u elastic -X DELETE https://localhost:9200/ind-1?pretty
+curl --cacert http_ca.crt -u elastic -X DELETE https://localhost:9200/ind-2?pretty
+curl --cacert http_ca.crt -u elastic -X DELETE https://localhost:9200/ind-3?pretty
+
+Enter host password for user 'elastic':
+{
+  "acknowledged" : true
+}
+```
+
 ## Задача 3
 
 В данном задании вы научитесь:
