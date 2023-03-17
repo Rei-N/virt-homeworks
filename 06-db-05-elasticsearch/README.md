@@ -31,6 +31,72 @@
 
 Далее мы будем работать с данным экземпляром elasticsearch.
 
+Ответ:
+1) Dockerfile
+
+```
+FROM centos:7
+
+EXPOSE 9200 9300
+
+ENV ES_HOME="/var/lib/elasticsearch" \
+    ES_PATH_CONF="/var/lib/elasticsearch/config" \
+    ES_VERSION="elasticsearch-8.6.2"
+
+RUN export ES_HOME="/var/lib/elasticsearch" && \
+    yum makecache && \
+    yum -y install wget && \
+    yum -y install vim && \
+    yum -y install iproute && \
+    yum -y install perl-Digest-SHA && \
+    wget https://artifacts.elastic.co/downloads/elasticsearch/${ES_VERSION}-linux-x86_64.tar.gz && \
+    wget https://artifacts.elastic.co/downloads/elasticsearch/${ES_VERSION}-linux-x86_64.tar.gz.sha512 && \
+    shasum -a 512 -c ${ES_VERSION}-linux-x86_64.tar.gz.sha512 && \
+    tar -xzf ${ES_VERSION}-linux-x86_64.tar.gz && \
+    mv ${ES_VERSION} ${ES_HOME}
+
+
+RUN useradd -m -u 1000 elasticsearch && \
+    chown elasticsearch:elasticsearch -R ${ES_HOME} && \
+    chmod o+x ${ES_HOME}
+
+#COPY --chown=elasticsearch:elasticsearch config/* /var/lib/elasticsearch/config/
+
+WORKDIR ${ES_HOME}
+
+USER elasticsearch
+
+CMD ["sh", "-c", "${ES_HOME}/bin/elasticsearch"]
+```
+
+2) Reference
+
+https://hub.docker.com/repository/docker/nvrein/netology/general
+docker pull nvrein/netology:elastic
+
+3)
+```
+curl --cacert http_ca.crt -u elastic https://localhost:9200
+Enter host password for user 'elastic':
+{
+  "name" : "80c1bbdba7e2",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "cKwqmqJdTNySeJQfpV7Sww",
+  "version" : {
+    "number" : "8.6.2",
+    "build_flavor" : "default",
+    "build_type" : "tar",
+    "build_hash" : "2d58d0f136141f03239816a4e360a8d17b6d8f29",
+    "build_date" : "2023-02-13T09:35:20.314882762Z",
+    "build_snapshot" : false,
+    "lucene_version" : "9.4.2",
+    "minimum_wire_compatibility_version" : "7.17.0",
+    "minimum_index_compatibility_version" : "7.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
+```
+
 ## Задача 2
 
 В этом задании вы научитесь:
