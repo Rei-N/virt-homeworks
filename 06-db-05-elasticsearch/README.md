@@ -196,6 +196,171 @@ Enter host password for user 'elastic':
 Подсказки:
 - возможно вам понадобится доработать `elasticsearch.yml` в части директивы `path.repo` и перезапустить `elasticsearch`
 
+Ответ:
+
+1)
+
+```
+echo path.repo: "/var/lib/elasticsearch/snapshots" >> config/elasticsearch.yml
+docker restart elastic
+```
+
+```
+curl --cacert http_ca.crt -u elastic -X PUT https://localhost:9200/_snapshot/netology_backup?pretty -H 'Content-Type: application/json' -d' { "type": "fs", "settings": { "location": "/var/lib/elasticsearch/snapshots"}}'
+Enter host password for user 'elastic':
+{
+  "error" : {
+    "root_cause" : [
+      {
+        "type" : "security_exception",
+        "reason" : "unable to authenticate user [elastic] for REST request [/_snapshot/netology_backup?pretty]",
+        "header" : {
+          "WWW-Authenticate" : [
+            "Basic realm=\"security\" charset=\"UTF-8\"",
+            "Bearer realm=\"security\"",
+            "ApiKey"
+          ]
+        }
+      }
+    ],
+    "type" : "security_exception",
+    "reason" : "unable to authenticate user [elastic] for REST request [/_snapshot/netology_backup?pretty]",
+    "header" : {
+      "WWW-Authenticate" : [
+        "Basic realm=\"security\" charset=\"UTF-8\"",
+        "Bearer realm=\"security\"",
+        "ApiKey"
+      ]
+    }
+  },
+  "status" : 401
+}
+
+docker exec -it elastic /var/lib/elasticsearch/bin/elasticsearch-setup-passwords interactive
+******************************************************************************
+Note: The 'elasticsearch-setup-passwords' tool has been deprecated. This       command will be removed in a future release.
+******************************************************************************
+
+Initiating the setup of passwords for reserved users elastic,apm_system,kibana,kibana_system,logstash_system,beats_system,remote_monitoring_user.
+You will be prompted to enter passwords as the process progresses.
+Please confirm that you would like to continue [y/N]y
+
+
+Enter password for [elastic]:
+Reenter password for [elastic]:
+...
+Changed password for user [elastic]
+
+curl --cacert http_ca.crt -u elastic -X PUT https://localhost:9200/_snapshot/netology_backup?pretty -H 'Content-Type: application/json' -d' { "type": "fs", "settings": { "location": "/var/lib/elasticsearch/snapshots"}}'
+Enter host password for user 'elastic':
+{
+  "acknowledged" : true
+}
+```
+
+2)
+
+```
+health status index uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   test  sloMCdJETlWDY6zDkax1hA   1   0          0            0       225b           225b
+```
+
+3)
+
+```
+curl --cacert http_ca.crt -u elastic -X PUT "https://localhost:9200/_snapshot/netology_backup/snapshot_before?wait_for_completion=true&pretty"
+Enter host password for user 'elastic':
+{
+  "snapshot" : {
+    "snapshot" : "snapshot_before",
+    "uuid" : "6Y41tbzDQS-zIrwQNYPUIQ",
+    "repository" : "netology_backup",
+    "version_id" : 8060299,
+    "version" : "8.6.2",
+    "indices" : [
+      ".security-7",
+      "test",
+      ".geoip_databases"
+    ],
+    "data_streams" : [ ],
+    "include_global_state" : true,
+    "state" : "SUCCESS",
+    "start_time" : "2023-03-18T04:28:52.737Z",
+    "start_time_in_millis" : 1679113732737,
+    "end_time" : "2023-03-18T04:28:56.568Z",
+    "end_time_in_millis" : 1679113736568,
+    "duration_in_millis" : 3831,
+    "failures" : [ ],
+    "shards" : {
+      "total" : 3,
+      "failed" : 0,
+      "successful" : 3
+    },
+    "feature_states" : [
+      {
+        "feature_name" : "geoip",
+        "indices" : [
+          ".geoip_databases"
+        ]
+      },
+      {
+        "feature_name" : "security",
+        "indices" : [
+          ".security-7"
+        ]
+      }
+    ]
+  }
+}
+
+docker exec -it elastic ls -la /var/lib/elasticsearch/snapshots
+total 48
+drwxr-xr-x 3 elasticsearch elasticsearch  4096 Mar 18 04:28 .
+drwxr-xr-x 1 elasticsearch elasticsearch  4096 Mar 18 04:29 ..
+-rw-r--r-- 1 elasticsearch elasticsearch  1100 Mar 18 04:28 index-0
+-rw-r--r-- 1 elasticsearch elasticsearch     8 Mar 18 04:28 index.latest
+drwxr-xr-x 5 elasticsearch elasticsearch  4096 Mar 18 04:28 indices
+-rw-r--r-- 1 elasticsearch elasticsearch 18841 Mar 18 04:28 meta-6Y41tbzDQS-zIrwQNYPUIQ.dat
+-rw-r--r-- 1 elasticsearch elasticsearch   390 Mar 18 04:28 snap-6Y41tbzDQS-zIrwQNYPUIQ.dat
+```
+
+4)
+
+```
+curl --cacert http_ca.crt -u elastic -X DELETE https://localhost:9200/test?pretty                                                     
+Enter host password for user 'elastic':
+{
+  "acknowledged" : true
+}
+
+curl --cacert http_ca.crt -u elastic -X PUT https://localhost:9200/test-2?pretty -H 'Content-Type: application/json' -d'{ "settings": { "index": { "number_of_shards": 1, "number_of_replicas": 0 }}}'
+Enter host password for user 'elastic':
+{
+  "acknowledged" : true,
+  "shards_acknowledged" : true,
+  "index" : "test-2"
+}
+
+curl --cacert http_ca.crt -u elastic https://localhost:9200/_cat/indices?v                                                            
+Enter host password for user 'elastic':
+health status index  uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   test-2 37boSl_fR86rUJKXRXDyeg   1   0          0            0       225b           225b
+```
+
+5)
+
+```
+curl --cacert http_ca.crt -u elastic -X POST "https://localhost:9200/_snapshot/netology_backup/snapshot_before/_restore?pretty"
+Enter host password for user 'elastic':
+{
+  "accepted" : true
+}
+curl --cacert http_ca.crt -u elastic https://localhost:9200/_cat/indices?v                                                            
+Enter host password for user 'elastic':
+health status index  uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   test-2 37boSl_fR86rUJKXRXDyeg   1   0          0            0       225b           225b
+green  open   test   DYyQNf7oSoOgctktn_BGgA   1   0          0            0       225b           225b
+```
 ---
 
 ### Как cдавать задание
