@@ -53,7 +53,7 @@ db.killOp({pr_id})
 Ответ:
 
 1)
-Вероятно случилось переполнение памяти истекшими ключами. Redis блокирует операции на запись, чтобы избежать утечки оперативной память и вернуть значение истекающих ключей до менее 25%, путем очистки базы. О механизме описано в документации ниже
+Вероятно случилось переполнение памяти истекшими ключами. Redis блокирует операции на запись, чтобы избежать утечки оперативной память и вернуть значение истекающих ключей до менее 25%(значение по умолчанию), путем очистки базы. О механизме описано в документации ниже
 
 ```
 if the database has many, many keys expiring in the same second, and these make up at least 25% of the current population of keys with an expire set, Redis can block in order to get the percentage of keys already expired below 25%.
@@ -117,7 +117,7 @@ shared_buffer
 work_mem
 effective_cache_size
 maintenance_work_mem
-4. Произвести настройку параметров ОС в sysctl.conf
+4. В крайнмй случай можно произвести настройку параметров ОС в sysctl.conf, только при условии, что база данных не предоставляется как сервис.
 vm.overcommit_memory
 vm.dirty_ratio
 vm.swappiness
