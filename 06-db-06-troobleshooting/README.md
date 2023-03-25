@@ -79,12 +79,10 @@ InterfaceError: (InterfaceError) 2013: Lost connection to MySQL server during qu
 1)
 Основываясь на документации MySQL https://dev.mysql.com/doc/лrefman/8.0/en/error-lost-connection.html
 
-```
 Возможны три причины:
 1. Слишком объемные запросы на миллионы строк -> рекомендуется увеличение параметра net_read_timeout
 2. Малое значение параметра connect_timeout, клиент не успевает установить соединение -> увеличить значение переменнйой connect_timeout
 3. Размер сообщения/запроса превышает размер буфера max_allowed_packet на сервере или max_allowed_packet на строне клиента -> увеличить значение max_allowed_packet
-```
 
 Итого для рения проблемы можно:
 Увеличить на сервере MySQL wait_timeout, connect_timeout, max_allowed_packet, net_write_timeout и net_read_timeout
@@ -107,10 +105,8 @@ InterfaceError: (InterfaceError) 2013: Lost connection to MySQL server during qu
 Ответ:
 
 1)
-```
 Причина "postmaster invoked oom-killer" в недостатке ресурсов оперативной памяти, чтобы предотвратить падение всей системы ОС Linux завершает процес утилизирующий память, 
 посредством OOM(Out-Of-Memory) Killer.
-```
 
 ```
 1. По возможности добавить ресурсов ОЗУ 
